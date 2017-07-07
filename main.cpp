@@ -107,9 +107,11 @@ void keyboard(unsigned char key, int x, int y)
 
 	case GLUT_KEY_RIGHT:
 		rocket.setPosition(rocket.getPosition() + vx);
+		break;
 
 	case GLUT_KEY_DOWN:
 		rocket.setPosition(rocket.getPosition() - vz);
+		break;
 	}
 	
 	/* 
