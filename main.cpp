@@ -1,4 +1,4 @@
-﻿/******************************************************************************************************************************
+/******************************************************************************************************************************
 
 	C Application Development (17/07/08)
 
@@ -8,7 +8,7 @@
 	2. Rocketクラス(object.hpp)の描画関数draw
 	3. Meteoriteクラス(object.hpp)の描画関数draw
 	4. 衝突した際の挙動をどうするか
-	5.
+
 	------OpenGL(Glut)のインストール方法(Visual Studio)------
 
 	1. Visual StudioのツールメニューからNuGetパッケージマネージャーからソリューションのNuGetパッケージの管理を開く
@@ -31,7 +31,7 @@
 
 ******************************************************************************************************************************/
 
-#include <GLUT/glut.h>
+#include <GL/glut.h>
 #include <GL/freeglut.h>
 #include <Eigen/Dense>
 #include <iostream>
@@ -43,6 +43,8 @@
 #include "camera.hpp"
 #include "light.hpp"
 #include "material.hpp"
+
+int mySpecialValue = 0;
 
 using namespace std;
 using namespace Eigen;
@@ -137,39 +139,84 @@ void draw()
 	glutSwapBuffers();
 }
 
+void myTimerFunc(int value)
+{
+	
+	//上下左右移動
+	if (mySpecialValue & (1 << 0)) // UP
+	{
+		rocket->setPosition(rocket->getPosition() + Vector3f(0.0f, -0.15f, 0.0f));
+		camera.setPosition(camera.getPosition() + Vector3f(0.0f, -0.15f, 0.0f));
+		camera.setTarget(camera.getPosition() + Vector3f(0.0f, 0.0f, 0.15f));
+		camera.begin();
+	}
+	if (mySpecialValue & (1 << 1)) // LEFT
+	{
+		rocket->setPosition(rocket->getPosition() + Vector3f(-0.15f, 0.0f, 0.0f));
+		camera.setPosition(camera.getPosition() + Vector3f(-0.15f, 0.0f, 0.0f));
+		camera.setTarget(camera.getPosition() + Vector3f(0.0f, 0.0f, 0.15f));
+		camera.begin();
+	}
+	if (mySpecialValue & (1 << 2)) // RIGHT
+	{
+		rocket->setPosition(rocket->getPosition() + Vector3f(+0.15f, 0.0f, 0.0f));
+		camera.setPosition(camera.getPosition() + Vector3f(+0.15f, 0.0f, 0.0f));
+		camera.setTarget(camera.getPosition() + Vector3f(0.0f, 0.0f, 0.15f));
+		camera.begin();
+	}
+	if (mySpecialValue & (1 << 3)) // DOWN
+	{
+		rocket->setPosition(rocket->getPosition() + Vector3f(0.0f, +0.15f, 0.0f));
+		camera.setPosition(camera.getPosition() + Vector3f(0.0f, +0.15f, 0.0f));
+		camera.setTarget(camera.getPosition() + Vector3f(0.0f, 0.0f, 0.15f));
+		camera.begin();
+	}
+	glutTimerFunc(10, myTimerFunc, 0);
+}
+
 // キーボードコールバック関数
 void keyboard(int key, int x, int y)
 {
 	switch (key)
 	{
 	case GLUT_KEY_UP:
-		rocket->setPosition(rocket->getPosition() + Vector3f(0.0f, -0.05f, 0.0f));
-		camera.setPosition(camera.getPosition() + Vector3f(0.0f, -0.05f, 0.0f));
-		camera.setTarget(camera.getPosition() + Vector3f(0.0f, 0.0f, 0.05f));
-		camera.begin();
-		break;
-
-	case GLUT_KEY_DOWN:
-		rocket->setPosition(rocket->getPosition() + Vector3f(0.0f, +0.05f, 0.0f));
-		camera.setPosition(camera.getPosition() + Vector3f(0.0f, +0.05f, 0.0f));
-		camera.setTarget(camera.getPosition() + Vector3f(0.0f, 0.0f, 0.05f));
-		camera.begin();
+		mySpecialValue |= 1 << 0;//mySpecialValueの1bit目を1にする
 		break;
 
 	case GLUT_KEY_LEFT:
-		rocket->setPosition(rocket->getPosition() + Vector3f(-0.05f, 0.0f, 0.0f));
-		camera.setPosition(camera.getPosition() + Vector3f(-0.05f, 0.0f, 0.0f));
-		camera.setTarget(camera.getPosition() + Vector3f(0.0f, 0.0f, 0.05f));
-		camera.begin();
+		mySpecialValue |= 1 << 1;//mySpecialValueの2bit目を1にする
 		break;
 
 	case GLUT_KEY_RIGHT:
-		rocket->setPosition(rocket->getPosition() + Vector3f(+0.05f, 0.0f, 0.0f));
-		camera.setPosition(camera.getPosition() + Vector3f(+0.05f, 0.0f, 0.0f));
-		camera.setTarget(camera.getPosition() + Vector3f(0.0f, 0.0f, 0.05f));
-		camera.begin();
+		mySpecialValue |= 1 << 2;//mySpecialValueの3bit目を1にする
+		break;
+
+	case GLUT_KEY_DOWN:
+		mySpecialValue |= 1 << 3;//mySpecialValueの4bit目を1にする
 		break;
 	}
+}
+
+void keyboardUP(int key, int x, int y)
+{
+	switch (key)
+	{
+	case GLUT_KEY_UP:
+		mySpecialValue &= ~(1 << 0);//mySpecialValueの1bit目を0にする
+		break;
+	case GLUT_KEY_LEFT:
+		mySpecialValue &= ~(1 << 1);//mySpecialValueの2bit目を0にする
+		break;
+	case GLUT_KEY_RIGHT:
+		mySpecialValue &= ~(1 << 2);//mySpecialValueの3bit目を0にする
+		break;
+	case GLUT_KEY_DOWN:
+		mySpecialValue &= ~(1 << 3);//mySpecialValueの4bit目を0にする
+		break;
+	default:
+		break;
+	}
+
 }
 
 // ウィンドウリサイズコールバック関数
@@ -232,7 +279,9 @@ int main(int argc, char **argv)
 	glutIdleFunc(update);
 	glutDisplayFunc(draw);
 	glutSpecialFunc(keyboard);
+	glutSpecialUpFunc(keyboardUP);
 	glutReshapeFunc(resize);
+	myTimerFunc(0);
 
 	setup();
 	glutMainLoop();
