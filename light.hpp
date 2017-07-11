@@ -2,7 +2,7 @@
 
 #include <Eigen/Dense>
 #include <GLUT/glut.h>
-#include <GLUT/freeglut.h>
+#include <GL/freeglut.h>
 
 using namespace std;
 using namespace Eigen;

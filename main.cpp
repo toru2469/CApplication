@@ -8,7 +8,7 @@
 	2. Rocketクラス(object.hpp)の描画関数draw
 	3. Meteoriteクラス(object.hpp)の描画関数draw
 	4. 衝突した際の挙動をどうするか
-
+	5.
 	------OpenGL(Glut)のインストール方法(Visual Studio)------
 
 	1. Visual StudioのツールメニューからNuGetパッケージマネージャーからソリューションのNuGetパッケージの管理を開く
