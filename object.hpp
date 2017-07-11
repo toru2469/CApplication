@@ -1,68 +1,113 @@
 #pragma once
 
-#include <GL/glut.h>
+#include <GLUT/glut.h>
 #include <vector>
 #include <array>
 #include <iostream>
 #include <Eigen/Dense>
 #include <Eigen/StdVector>
+#include "material.hpp"
 
 using namespace std;
+using namespace Eigen;
 
+// 一般的なオブジェクトのクラス
 class Object
 {
-private:
+protected:
 
-	// 位置の3次元座標
-	array<float, 3> position;
-	// 向き(まだ考え中)
-	array<float, 3> orientation;
+	// 位置
+	Vector3f position;
+	// 向き
+	Vector3f orientation;
+	// 速度
+	Vector3f velocity;
+	// 加速度
+	Vector3f acceleration;
 
-	// マテリアルの色
-	array<float, 4> materialDiffuseColor;
-	array<float, 4> materialAmbientColor;
-	array<float, 4> materialSpecularColor;
-	float materialShininess;
+	// マテリアル
+	Material material;
 
-	// 描画する際の頂点座標を格納しているvector
-	vector<array<float, 3>> vertices;
+	// 頂点座標
+	vector<Vector3f, aligned_allocator<Vector3f>> vertices;
 
 public:
 
-	Object();
+	virtual ~Object() = default;
 
-	~Object();
-
-	Object(const Object& object);
-
-	Object(Object&& object);
-
-	Object& operator=(const Object& object);
-
-	Object& operator=(Object&& object);
-
-	// 必要に応じて初期設定
+	// 初期設定
 	void setup();
 
 	// 位置や向きを更新
 	void update();
 
 	// 頂点座標を描画
-	void draw() const;
+	virtual void draw() const;
 
-	// 位置をゲット
-	array<float, 3> getPosition() const;
+	// 衝突判定
+	bool colliding(const Object&);
 
-	// 位置をセット
-	void setPosition(const array<float, 3>& _position);
+	vector<Vector3f, aligned_allocator<Vector3f>>& getVertices();
+	const vector<Vector3f, aligned_allocator<Vector3f>>& getVertices() const;
+	
+	Vector3f getPosition() const;
+	void setPosition(const Vector3f&);
+	void setPosition(Vector3f&&);
 
-	void setPosition(array<float, 3>&& _position);
+	Vector3f getOrientation() const;
+	void setOrientation(const Vector3f&);
+	void setOrientation(Vector3f&&);
 
-	// 向きをゲット
-	array<float, 3> getOrientation() const;
+	Vector3f getVelocity() const;
+	void setVelocity(const Vector3f&);
+	void setVelocity(Vector3f&&);
 
-	// 向きをセット
-	void setOrientation(const array<float, 3>& _orientation);
+	Vector3f getAcceleration() const;
+	void setAcceleration(const Vector3f&);
+	void setAcceleration(Vector3f&&);
 
-	void setOrientation(array<float, 3>&& _orientation);
+	Material getMaterial() const;
+	void setMaterial(const Material&);
+	void setMaterial(Material&&);
+};
+
+// ロケットクラス
+class Rocket : public Object
+{
+public:
+
+	void draw() const override
+	{
+		material.begin();
+
+		glPushMatrix();
+		{
+			glTranslatef(position.x(), position.y(), position.z());
+
+			// ここにロケット描画のコードを書く
+			// ...
+		}
+		glPopMatrix();
+	}
+};
+
+// 隕石クラス
+class Meteorite : public Object
+{
+public:
+
+	void draw() const override
+	{
+		material.begin();
+
+		glPushMatrix();
+		{
+			glTranslatef(position.x(), position.y(), position.z());
+
+			// ここに隕石描画のコードを書く
+			// とりあえずは球体
+			glutSolidSphere(0.5, 30, 30);
+		}
+		glPopMatrix();
+	}
 };

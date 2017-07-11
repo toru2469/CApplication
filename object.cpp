@@ -1,125 +1,126 @@
 #include "object.hpp"
 
-Object::Object()
-{
-	setup();
-}
-
-Object::~Object()
-{
-	setup();
-}
-
-Object::Object(const Object& object)
-	: position(object.position), orientation(object.orientation)
-{
-	setup();
-}
-
-Object::Object(Object&& object)
-	: position(move(object.position)), orientation(move(object.orientation))
-{
-	setup();
-}
-
-Object& Object::operator=(const Object& object)
-{
-	position = object.position;
-
-	return *this;
-}
-
-Object& Object::operator=(Object&& object)
-{
-	position = move(object.position);
-
-	return *this;
-}
-
 void Object::setup()
 {
-	materialDiffuseColor[0] = 0.0;
-	materialDiffuseColor[1] = 0.0;
-	materialDiffuseColor[2] = 0.0;
-	materialDiffuseColor[3] = 1.0;
-	
-	materialAmbientColor[0] = 0.0;
-	materialAmbientColor[1] = 0.0;
-	materialAmbientColor[2] = 0.0;
-	materialAmbientColor[3] = 1.0;
-
-	materialSpecularColor[0] = 0.0;
-	materialSpecularColor[1] = 0.0;
-	materialSpecularColor[2] = 0.0;
-	materialSpecularColor[3] = 1.0;
-	
-	materialShininess = 10.0;
+	// なにか初期化したいときに
 }
 
 void Object::update()
 {
-	/*
-		ここでは時間経過に応じた位置、向きの更新を行う
-	*/
-
-	position[2] -= 0.02;
+	// 等加速度運動を仮定して位置更新
+	position += velocity + acceleration * 0.5;
+	velocity += acceleration;
 }
 
 void Object::draw() const
 {
-	/*
-		頂点座標のvectorをfor文で順に描画する
-		こんな感じ
-	*/
+	// 頂点座標を順に描画していく
 
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, materialDiffuseColor.data());
-	glMaterialfv(GL_FRONT, GL_AMBIENT, materialAmbientColor.data());
-	glMaterialfv(GL_FRONT, GL_SPECULAR, materialSpecularColor.data());
-	glMaterialf(GL_FRONT, GL_SHININESS, materialShininess);
+	material.begin();
 
 	glPushMatrix();
 	{
-		glTranslatef(position[0], position[1], position[2]);
-		glutSolidSphere(1.0, 30, 30);
+		glTranslatef(position.x(), position.y(), position.z());
 
-		/*
 		glBegin(GL_TRIANGLES);
-		for_each(begin(vertices), end(vertices), [](const auto& vertex)
 		{
-		glVertex3fv(vertex.data());
-		});
+			for_each(begin(vertices), end(vertices), [](const auto& vertex)
+			{
+				glVertex3fv(vertex.data());
+			});
+		}
 		glEnd();
-		*/
 	}
 	glPopMatrix();
 }
 
-array<float, 3> Object::getPosition() const
+bool Object::colliding(const Object& object)
+{
+	// 衝突判定のコードをかく
+	// ...
+}
+
+vector<Vector3f, aligned_allocator<Vector3f>>& Object::getVertices()
+{
+	return vertices;
+}
+
+const vector<Vector3f, aligned_allocator<Vector3f>>& Object::getVertices() const
+{
+	return vertices;
+}
+
+Vector3f Object::getPosition() const
 {
 	return position;
 }
 
-void Object::setPosition(const array<float, 3>& _position)
+void Object::setPosition(const Vector3f& _position)
 {
 	position = _position;
 }
 
-void Object::setPosition(array<float, 3>&& _position)
+void Object::setPosition(Vector3f&& _position)
 {
 	position = move(_position);
 }
 
-array<float, 3> Object::getOrientation() const
+Vector3f Object::getOrientation() const
 {
 	return orientation;
 }
 
-void Object::setOrientation(const array<float, 3>& _orientation)
+void Object::setOrientation(const Vector3f& _orientation)
 {
 	orientation = _orientation;
 }
 
-void Object::setOrientation(array<float, 3>&& _orientation)
+void Object::setOrientation(Vector3f&& _orientation)
 {
 	orientation = move(_orientation);
+}
+
+Vector3f Object::getVelocity() const
+{
+	return velocity;
+}
+
+void Object::setVelocity(const Vector3f& _velocity)
+{
+	velocity = _velocity;
+}
+
+void Object::setVelocity(Vector3f&& _velocity)
+{
+	velocity = move(_velocity);
+}
+
+Vector3f Object::getAcceleration() const
+{
+	return acceleration;
+}
+
+void Object::setAcceleration(const Vector3f& _acceleration)
+{
+	acceleration = _acceleration;
+}
+
+void Object::setAcceleration(Vector3f&& _acceleration)
+{
+	acceleration = move(_acceleration);
+}
+
+Material Object::getMaterial() const
+{
+	return material;
+}
+
+void Object::setMaterial(const Material& _material)
+{
+	material = _material;
+}
+
+void Object::setMaterial(Material&& _material)
+{
+	material = move(_material);
 }
